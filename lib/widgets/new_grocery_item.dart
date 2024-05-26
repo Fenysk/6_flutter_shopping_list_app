@@ -51,9 +51,8 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
                         hintText: 'Enter the name of the item',
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a name';
-                        }
+                        if (value == null || value.isEmpty) return 'Please enter a name';
+                        if (value.length < 2 || value.length > 25) return 'Name must be between 2 and 25 characters';
                         return null;
                       },
                     ),
