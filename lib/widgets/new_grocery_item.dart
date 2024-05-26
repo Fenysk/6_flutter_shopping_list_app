@@ -17,6 +17,8 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
   final TextEditingController _quantityController = TextEditingController();
   Category? _selectedCategory;
 
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,66 +28,81 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _nameController,
-                    keyboardType: TextInputType.name,
-                    keyboardAppearance: Brightness.light,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter the name of the item',
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _nameController,
+                      keyboardType: TextInputType.name,
+                      keyboardAppearance: Brightness.light,
+                      decoration: const InputDecoration(
+                        hintText: 'Enter the name of the item',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a name';
+                        }
+                        return null;
+                      },
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                SizedBox(
-                  width: 100,
-                  child: TextField(
-                    controller: _quantityController,
-                    keyboardType: TextInputType.number,
-                    keyboardAppearance: Brightness.light,
-                    decoration: const InputDecoration(
-                      hintText: 'Quantity',
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    width: 100,
+                    child: TextFormField(
+                      controller: _quantityController,
+                      keyboardType: TextInputType.number,
+                      keyboardAppearance: Brightness.light,
+                      decoration: const InputDecoration(
+                        hintText: 'Quantity',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Please enter a quantity';
+                        if (int.tryParse(value) == null) return 'Please enter a valid number';
+                        return null;
+                      },
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            DropdownButton<Category>(
-              value: _selectedCategory,
-              hint: const Text('Select a category'),
-              items: categories.values.map((Category category) {
-                return DropdownMenuItem<Category>(
-                  value: category,
-                  child: Text(category.title),
-                );
-              }).toList(),
-              onChanged: (Category? newValue) {
-                setState(() {
-                  _selectedCategory = newValue;
-                });
-              },
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (_nameController.text.isEmpty || _quantityController.text.isEmpty || _selectedCategory == null) return;
+                ],
+              ),
+              const SizedBox(height: 10),
+              DropdownButtonFormField<Category>(
+                value: _selectedCategory,
+                hint: const Text('Select a category'),
+                items: categories.values
+                    .map((Category category) => DropdownMenuItem<Category>(
+                          value: category,
+                          child: Text(category.title),
+                        ))
+                    .toList(),
+                onChanged: (Category? newCategory) => setState(() => _selectedCategory = newCategory),
+                validator: (value) {
+                  if (value == null) return 'Please select a category';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    final newItem = GroceryItem(
+                      name: _nameController.text,
+                      quantity: int.tryParse(_quantityController.text)!,
+                      category: _selectedCategory!,
+                    );
 
-                final newItem = GroceryItem(
-                  name: _nameController.text,
-                  quantity: int.tryParse(_quantityController.text) ?? 1,
-                  category: _selectedCategory!,
-                );
-
-                widget.onSubmitNewItem(newItem, context);
-              },
-              child: const Text('Add Item'),
-            ),
-          ],
+                    widget.onSubmitNewItem(newItem, context);
+                  }
+                },
+                child: const Text('Add to list'),
+              ),
+            ],
+          ),
         ),
       ),
     );
