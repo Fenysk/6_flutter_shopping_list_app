@@ -4,9 +4,7 @@ import 'package:shopping_list_app/models/category.dart';
 import 'package:shopping_list_app/data/categories.dart';
 
 class NewGroceryItem extends StatefulWidget {
-  const NewGroceryItem({super.key, required this.onSubmitNewItem});
-
-  final Function(GroceryItem, BuildContext) onSubmitNewItem;
+  const NewGroceryItem({super.key});
 
   @override
   State<NewGroceryItem> createState() => _NewGroceryItemState();
@@ -15,7 +13,7 @@ class NewGroceryItem extends StatefulWidget {
 class _NewGroceryItemState extends State<NewGroceryItem> {
   String _enteredName = '';
   int _enteredQuantity = 1;
-  Category _selectedCategory = categories[Categories.vegetables]!;
+  Category _selectedCategory = categories[Categories.other]!;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -23,12 +21,13 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      final newItem = GroceryItem(
-        name: _enteredName,
-        quantity: _enteredQuantity,
-        category: _selectedCategory!,
+      Navigator.of(context).pop(
+        GroceryItem(
+          name: _enteredName,
+          quantity: _enteredQuantity,
+          category: _selectedCategory,
+        ),
       );
-      widget.onSubmitNewItem(newItem, context);
     }
   }
 

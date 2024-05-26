@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_list_app/widgets/new_grocery_item.dart';
 import 'package:shopping_list_app/models/grocery_item.dart';
-import 'package:shopping_list_app/data/dummy_items.dart';
 
 class GroceryList extends StatefulWidget {
   const GroceryList({super.key});
@@ -11,13 +10,18 @@ class GroceryList extends StatefulWidget {
 }
 
 class _GroceryListState extends State<GroceryList> {
-  final List<GroceryItem> _groceryItems = groceryItems;
+  final List<GroceryItem> _groceryItems = [];
 
-  void _addNewItem(GroceryItem item, BuildContext context) {
-    setState(() {
-      _groceryItems.add(item);
-    });
-    Navigator.of(context).pop();
+  void _addNewItem() async {
+    final newItem = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const NewGroceryItem(),
+      ),
+    );
+
+    if (newItem == null) return;
+
+    setState(() => _groceryItems.add(newItem));
   }
 
   @override
@@ -27,13 +31,7 @@ class _GroceryListState extends State<GroceryList> {
         title: const Text('Grocery List'),
         actions: [
           IconButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => NewGroceryItem(onSubmitNewItem: _addNewItem),
-                ),
-              );
-            },
+            onPressed: _addNewItem,
             icon: const Icon(Icons.add),
           ),
         ],
