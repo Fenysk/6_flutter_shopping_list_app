@@ -19,6 +19,13 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  void _resetForm() {
+    _nameController.clear();
+    _quantityController.clear();
+
+    setState(() => _selectedCategory = null);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,19 +94,31 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
                 },
               ),
               const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    final newItem = GroceryItem(
-                      name: _nameController.text,
-                      quantity: int.tryParse(_quantityController.text)!,
-                      category: _selectedCategory!,
-                    );
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: _resetForm,
+                    child: const Text(
+                      'Reset',
+                      style: TextStyle(color: Color.fromARGB(184, 35, 194, 223)),
+                    ),
+                  ),
+                  const Spacer(),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        final newItem = GroceryItem(
+                          name: _nameController.text,
+                          quantity: int.tryParse(_quantityController.text)!,
+                          category: _selectedCategory!,
+                        );
 
-                    widget.onSubmitNewItem(newItem, context);
-                  }
-                },
-                child: const Text('Add to list'),
+                        widget.onSubmitNewItem(newItem, context);
+                      }
+                    },
+                    child: const Text('Add to list'),
+                  ),
+                ],
               ),
             ],
           ),
