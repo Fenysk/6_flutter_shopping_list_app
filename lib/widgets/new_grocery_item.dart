@@ -13,17 +13,40 @@ class NewGroceryItem extends StatefulWidget {
 }
 
 class _NewGroceryItemState extends State<NewGroceryItem> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _quantityController = TextEditingController();
-  Category? _selectedCategory;
+  String _enteredName = '';
+  int _enteredQuantity = 1;
+  Category _selectedCategory = categories[Categories.vegetables]!;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  void _resetForm() {
-    _nameController.clear();
-    _quantityController.clear();
+  void _submitNewItem() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
 
-    setState(() => _selectedCategory = null);
+      final newItem = GroceryItem(
+        name: _enteredName,
+        quantity: _enteredQuantity,
+        category: _selectedCategory!,
+      );
+      widget.onSubmitNewItem(newItem, context);
+    }
+  }
+
+  String? _validateName(String? value) {
+    if (value == null || value.isEmpty) return 'Please enter a name';
+    if (value.length < 2 || value.length > 25) return 'Name must be between 2 and 25 characters';
+    return null;
+  }
+
+  String? _validateQuantity(String? value) {
+    if (value == null || value.isEmpty) return 'Please enter a quantity';
+    if (int.tryParse(value) == null) return 'Please enter a valid number';
+    return null;
+  }
+
+  String? _validateCategory(Category? value) {
+    if (value == null) return 'Please select a category';
+    return null;
   }
 
   @override
@@ -44,41 +67,33 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
                 children: [
                   Expanded(
                     child: TextFormField(
-                      controller: _nameController,
                       keyboardType: TextInputType.name,
                       keyboardAppearance: Brightness.light,
                       decoration: const InputDecoration(
                         hintText: 'Enter the name of the item',
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) return 'Please enter a name';
-                        if (value.length < 2 || value.length > 25) return 'Name must be between 2 and 25 characters';
-                        return null;
-                      },
+                      onSaved: (String? newName) => _enteredName = newName!,
+                      validator: _validateName,
                     ),
                   ),
                   const SizedBox(width: 10),
                   SizedBox(
                     width: 100,
                     child: TextFormField(
-                      controller: _quantityController,
                       keyboardType: TextInputType.number,
                       keyboardAppearance: Brightness.light,
                       decoration: const InputDecoration(
                         hintText: 'Quantity',
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) return 'Please enter a quantity';
-                        if (int.tryParse(value) == null) return 'Please enter a valid number';
-                        return null;
-                      },
+                      initialValue: _enteredQuantity.toString(),
+                      onSaved: (String? newQuantity) => _enteredQuantity = int.parse(newQuantity!),
+                      validator: _validateQuantity,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 10),
               DropdownButtonFormField<Category>(
-                value: _selectedCategory,
                 hint: const Text('Select a category'),
                 items: categories.values
                     .map((Category category) => DropdownMenuItem<Category>(
@@ -96,35 +111,20 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
                           ),
                         ))
                     .toList(),
-                onChanged: (Category? newCategory) => setState(() => _selectedCategory = newCategory),
-                validator: (value) {
-                  if (value == null) return 'Please select a category';
-                  return null;
-                },
+                onChanged: (Category? newCategory) => _selectedCategory = newCategory!,
+                validator: _validateCategory,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: _resetForm,
-                    child: const Text(
-                      'Reset',
-                      style: TextStyle(color: Color.fromARGB(184, 35, 194, 223)),
-                    ),
+                    onPressed: () => _formKey.currentState!.reset(),
+                    child: const Text('Reset'),
                   ),
-                  const Spacer(),
+                  const SizedBox(width: 10),
                   ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        final newItem = GroceryItem(
-                          name: _nameController.text,
-                          quantity: int.tryParse(_quantityController.text)!,
-                          category: _selectedCategory!,
-                        );
-
-                        widget.onSubmitNewItem(newItem, context);
-                      }
-                    },
+                    onPressed: _submitNewItem,
                     child: const Text('Add to list'),
                   ),
                 ],
