@@ -24,6 +24,12 @@ class _GroceryListState extends State<GroceryList> {
     setState(() => _groceryItems.add(newItem));
   }
 
+  void _removeItem(String id) {
+    setState(() {
+      _groceryItems.removeWhere((item) => item.id == id);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,23 +51,42 @@ class _GroceryListState extends State<GroceryList> {
             )
           : ListView.builder(
               itemCount: _groceryItems.length,
-              itemBuilder: (ctx, index) => ListTile(
-                title: Text(_groceryItems[index].name),
-                subtitle: Text(_groceryItems[index].category.title),
-                leading: Container(
-                  color: _groceryItems[index].category.color,
-                  width: 30,
-                  height: 30,
-                ),
-                trailing: Text(
-                  _groceryItems[index].quantity.toString(),
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+              itemBuilder: (ctx, index) {
+                final item = _groceryItems[index];
+                return Dismissible(
+                  key: ValueKey(item.id),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (direction) {
+                    _removeItem(item.id);
+                  },
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-              ),
+                  child: ListTile(
+                    title: Text(item.name),
+                    subtitle: Text(item.category.title),
+                    leading: Container(
+                      color: item.category.color,
+                      width: 30,
+                      height: 30,
+                    ),
+                    trailing: Text(
+                      item.quantity.toString(),
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
     );
   }
