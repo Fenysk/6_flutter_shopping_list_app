@@ -84,7 +84,17 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
                 items: categories.values
                     .map((Category category) => DropdownMenuItem<Category>(
                           value: category,
-                          child: Text(category.title),
+                          child: Row(
+                            children: [
+                              Container(
+                                color: category.color,
+                                width: 20,
+                                height: 20,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(category.title),
+                            ],
+                          ),
                         ))
                     .toList(),
                 onChanged: (Category? newCategory) => setState(() => _selectedCategory = newCategory),
