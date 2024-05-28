@@ -56,9 +56,7 @@ class _GroceryListState extends State<GroceryList> {
                 return Dismissible(
                   key: ValueKey(item.id),
                   direction: DismissDirection.endToStart,
-                  onDismissed: (direction) {
-                    _removeItem(item.id);
-                  },
+                  onDismissed: (direction) => _removeItem(item.id),
                   background: Container(
                     color: Colors.red,
                     alignment: Alignment.centerRight,

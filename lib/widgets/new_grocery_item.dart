@@ -13,7 +13,7 @@ class NewGroceryItem extends StatefulWidget {
 class _NewGroceryItemState extends State<NewGroceryItem> {
   String _enteredName = '';
   int _enteredQuantity = 1;
-  Category _selectedCategory = categories[Categories.other]!;
+  Category? _selectedCategory;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -25,26 +25,26 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
         GroceryItem(
           name: _enteredName,
           quantity: _enteredQuantity,
-          category: _selectedCategory,
+          category: _selectedCategory!,
         ),
       );
     }
   }
 
-  String? _validateName(String? value) {
-    if (value == null || value.isEmpty) return 'Please enter a name';
-    if (value.length < 2 || value.length > 25) return 'Name must be between 2 and 25 characters';
+  String? _validateName(String? name) {
+    if (name == null || name.isEmpty) return 'Please enter a name';
+    if (name.length < 2 || name.length > 25) return 'Name must be between 2 and 25 characters';
     return null;
   }
 
-  String? _validateQuantity(String? value) {
-    if (value == null || value.isEmpty) return 'Please enter a quantity';
-    if (int.tryParse(value) == null) return 'Please enter a valid number';
+  String? _validateQuantity(String? quantity) {
+    if (quantity == null || quantity.isEmpty) return 'Please enter a quantity';
+    if (int.tryParse(quantity) == null) return 'Please enter a valid number';
     return null;
   }
 
-  String? _validateCategory(Category? value) {
-    if (value == null) return 'Please select a category';
+  String? _validateCategory(Category? category) {
+    if (category == null) return 'Please select a category';
     return null;
   }
 
@@ -77,7 +77,7 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
                   ),
                   const SizedBox(width: 10),
                   SizedBox(
-                    width: 100,
+                    width: 120,
                     child: TextFormField(
                       keyboardType: TextInputType.number,
                       keyboardAppearance: Brightness.light,
@@ -110,7 +110,7 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
                           ),
                         ))
                     .toList(),
-                onChanged: (Category? newCategory) => _selectedCategory = newCategory!,
+                onChanged: (Category? newCategory) => _selectedCategory = newCategory,
                 validator: _validateCategory,
               ),
               const SizedBox(height: 12),
