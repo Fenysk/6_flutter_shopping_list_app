@@ -24,33 +24,41 @@ class _GroceryListState extends State<GroceryList> {
   }
 
   void _fetchItems() async {
+    isLoading = true;
+
     final url = Uri.https('flutter-shopping-list-48a40-default-rtdb.europe-west1.firebasedatabase.app', 'shopping-list.json');
 
-    final response = await http.get(url);
+    try {
+      final response = await http.get(url);
 
-    if (response.statusCode >= 400) return setState(() => error = 'Failed to load items, please try again later.');
+      if (response.statusCode >= 400) return setState(() => error = 'Failed to load items, please try again later.');
 
-    final Map<String, dynamic>? fetchedItems = json.decode(response.body);
+      final Map<String, dynamic>? fetchedItems = json.decode(response.body);
 
-    if (fetchedItems == null || fetchedItems.isEmpty) return setState(() => isLoading = false);
+      if (fetchedItems == null || fetchedItems.isEmpty) return setState(() => isLoading = false);
 
-    final List<GroceryItem> loadedItems = [];
+      final List<GroceryItem> loadedItems = [];
 
-    for (final item in fetchedItems.entries) {
-      final category = categories.values.firstWhere((catItem) => catItem.title == item.value['category']);
+      for (final item in fetchedItems.entries) {
+        final category = categories.values.firstWhere((catItem) => catItem.title == item.value['category']);
 
-      loadedItems.add(
-        GroceryItem(
-          id: item.key,
-          name: item.value['name'],
-          quantity: item.value['quantity'],
-          category: category,
-        ),
-      );
+        loadedItems.add(
+          GroceryItem(
+            id: item.key,
+            name: item.value['name'],
+            quantity: item.value['quantity'],
+            category: category,
+          ),
+        );
+      }
+
+      isLoading = false;
+      setState(() => _groceryItems = loadedItems);
+    } catch (err) {
+      error = 'Failed to load items, please try again later.';
+    } finally {
+      setState(() => isLoading = false);
     }
-
-    isLoading = false;
-    setState(() => _groceryItems = loadedItems);
   }
 
   void _addNewItem() async {
