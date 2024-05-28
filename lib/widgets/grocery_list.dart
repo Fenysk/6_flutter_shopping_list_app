@@ -65,14 +65,14 @@ class _GroceryListState extends State<GroceryList> {
     setState(() => _groceryItems.add(newItem));
   }
 
-  void _removeItem(String id) async {
-    final url = Uri.https('flutter-shopping-list-48a40-default-rtdb.europe-west1.firebasedatabase.app', 'shopping-list/$id.json');
+  void _removeItem(GroceryItem item) async {
+    final url = Uri.https('flutter-shopping-list-48a40-default-rtdb.europe-west1.firebasedatabase.app', 'shopping-list/${item.id}.json');
 
     final response = await http.delete(url);
 
     if (response.statusCode != 200) throw Exception('Failed to delete item');
 
-    setState(() => _groceryItems.removeWhere((item) => item.id == id));
+    setState(() => _groceryItems.remove(item));
   }
 
   @override
@@ -95,7 +95,7 @@ class _GroceryListState extends State<GroceryList> {
           return Dismissible(
             key: ValueKey(item.id),
             direction: DismissDirection.endToStart,
-            onDismissed: (direction) => _removeItem(item.id),
+            onDismissed: (direction) => _removeItem(item),
             background: Container(
               color: Colors.red,
               alignment: Alignment.centerRight,
