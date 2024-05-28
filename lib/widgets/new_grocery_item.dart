@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shopping_list_app/models/grocery_item.dart';
 import 'package:shopping_list_app/models/category.dart';
 import 'package:shopping_list_app/data/categories.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class NewGroceryItem extends StatefulWidget {
   const NewGroceryItem({super.key});
@@ -11,23 +13,39 @@ class NewGroceryItem extends StatefulWidget {
 }
 
 class _NewGroceryItemState extends State<NewGroceryItem> {
-  String _enteredName = '';
-  int _enteredQuantity = 1;
-  Category? _selectedCategory;
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  void _submitNewItem() {
+  var _enteredName = '';
+  var _enteredQuantity = 1;
+  var _selectedCategory = categories.values.first;
+
+  void _submitNewItem() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      Navigator.of(context).pop(
-        GroceryItem(
-          name: _enteredName,
-          quantity: _enteredQuantity,
-          category: _selectedCategory!,
-        ),
+      final newItem = {
+        'name': _enteredName,
+        'quantity': _enteredQuantity,
+        'category': _selectedCategory.title,
+      };
+
+      final url = Uri.https('flutter-shopping-list-48a40-default-rtdb.europe-west1.firebasedatabase.app', 'shopping-list.json');
+
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(newItem),
       );
+
+      if (response.statusCode != 200) throw Exception('Failed to add item');
+
+      print(response.body);
+      print(response.statusCode);
+
+      if (!context.mounted) return;
+      Navigator.of(context).pop();
     }
   }
 
@@ -110,7 +128,7 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
                           ),
                         ))
                     .toList(),
-                onChanged: (Category? newCategory) => _selectedCategory = newCategory,
+                onChanged: (Category? newCategory) => _selectedCategory = newCategory!,
                 validator: _validateCategory,
               ),
               const SizedBox(height: 12),
