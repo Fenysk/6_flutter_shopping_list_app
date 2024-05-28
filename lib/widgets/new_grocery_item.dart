@@ -19,9 +19,13 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
   var _enteredQuantity = 1;
   var _selectedCategory = categories.values.first;
 
+  bool isSending = false;
+
   void _submitNewItem() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+
+      setState(() => isSending = true);
 
       final url = Uri.https('flutter-shopping-list-48a40-default-rtdb.europe-west1.firebasedatabase.app', 'shopping-list.json');
 
@@ -36,6 +40,8 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
           'category': _selectedCategory.title,
         }),
       );
+
+      setState(() => isSending = false);
 
       if (response.statusCode != 200) throw Exception('Failed to add item');
 
@@ -138,13 +144,19 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: () => _formKey.currentState!.reset(),
+                    onPressed: isSending ? null : () => _formKey.currentState!.reset(),
                     child: const Text('Reset'),
                   ),
                   const SizedBox(width: 10),
                   ElevatedButton(
-                    onPressed: _submitNewItem,
-                    child: const Text('Add to list'),
+                    onPressed: isSending ? null : _submitNewItem,
+                    child: isSending
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(),
+                          )
+                        : const Text('Add to list'),
                   ),
                 ],
               ),
