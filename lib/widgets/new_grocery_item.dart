@@ -3,6 +3,7 @@ import 'package:shopping_list_app/models/category.dart';
 import 'package:shopping_list_app/data/categories.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shopping_list_app/models/grocery_item.dart';
 
 class NewGroceryItem extends StatefulWidget {
   const NewGroceryItem({super.key});
@@ -38,8 +39,15 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
 
       if (response.statusCode != 200) throw Exception('Failed to add item');
 
+      final Map<String, dynamic> resData = json.decode(response.body);
+
       if (!context.mounted) return;
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(GroceryItem(
+        id: resData['name'],
+        name: _enteredName,
+        quantity: _enteredQuantity,
+        category: _selectedCategory,
+      ));
     }
   }
 
