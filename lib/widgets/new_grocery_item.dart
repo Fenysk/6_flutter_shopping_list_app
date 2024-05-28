@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shopping_list_app/models/grocery_item.dart';
 import 'package:shopping_list_app/models/category.dart';
 import 'package:shopping_list_app/data/categories.dart';
 import 'package:http/http.dart' as http;
@@ -23,12 +22,6 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      final newItem = {
-        'name': _enteredName,
-        'quantity': _enteredQuantity,
-        'category': _selectedCategory.title,
-      };
-
       final url = Uri.https('flutter-shopping-list-48a40-default-rtdb.europe-west1.firebasedatabase.app', 'shopping-list.json');
 
       final response = await http.post(
@@ -36,13 +29,14 @@ class _NewGroceryItemState extends State<NewGroceryItem> {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: json.encode(newItem),
+        body: json.encode({
+          'name': _enteredName,
+          'quantity': _enteredQuantity,
+          'category': _selectedCategory.title,
+        }),
       );
 
       if (response.statusCode != 200) throw Exception('Failed to add item');
-
-      print(response.body);
-      print(response.statusCode);
 
       if (!context.mounted) return;
       Navigator.of(context).pop();
