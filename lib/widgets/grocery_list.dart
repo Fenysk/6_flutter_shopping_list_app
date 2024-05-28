@@ -26,9 +26,9 @@ class _GroceryListState extends State<GroceryList> {
 
     final response = await http.get(url);
 
-    // {"-Nyy8LKyhHkxOz9ryFDO":{"category":"Meat","name":"test","quantity":1},"-Nyy8gI-qpk9IZYZZF3b":{"category":"Carbs","name":"ouais","quantity":3},"-Nyy9J3FRo1pgpXFpu7y":{"category":"Hygiene","name":"troisieme","quantity":3},"-Nyy9NttxguI21RePd0b":{"category":"Hygiene","name":"troisieme","quantity":3},"-Nyy9e_KOhLAQvowl3zC":{"category":"Dairy","name":"Super","quantity":1},"-Nyy9zXsuJcWToSmOFPB":{"category":"Meat","name":"Test","quantity":1},"-NyyA11zsApjPRGtH0xB":{"category":"Dairy","name":"ca met du temps","quantity":5},"-NyyAXRN2RUelz4Sq83d":{"category":"Meat","name":"test","quantity":1}}
+    final Map<String, dynamic>? fetchedItems = json.decode(response.body);
 
-    final Map<String, dynamic> fetchedItems = json.decode(response.body);
+    if (fetchedItems == null || fetchedItems.isEmpty) return;
 
     final List<GroceryItem> loadedItems = [];
 
@@ -60,10 +60,14 @@ class _GroceryListState extends State<GroceryList> {
     setState(() => _groceryItems.add(newItem));
   }
 
-  void _removeItem(String id) {
-    setState(() {
-      _groceryItems.removeWhere((item) => item.id == id);
-    });
+  void _removeItem(String id) async {
+    final url = Uri.https('flutter-shopping-list-48a40-default-rtdb.europe-west1.firebasedatabase.app', 'shopping-list/$id.json');
+
+    final response = await http.delete(url);
+
+    if (response.statusCode != 200) throw Exception('Failed to delete item');
+
+    setState(() => _groceryItems.removeWhere((item) => item.id == id));
   }
 
   @override
