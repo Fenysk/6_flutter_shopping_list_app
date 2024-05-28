@@ -66,13 +66,25 @@ class _GroceryListState extends State<GroceryList> {
   }
 
   void _removeItem(GroceryItem item) async {
+    final index = _groceryItems.indexOf(item);
+
     final url = Uri.https('flutter-shopping-list-48a40-default-rtdb.europe-west1.firebasedatabase.app', 'shopping-list/${item.id}.json');
+
+    setState(() => _groceryItems.remove(item));
 
     final response = await http.delete(url);
 
-    if (response.statusCode != 200) throw Exception('Failed to delete item');
-
-    setState(() => _groceryItems.remove(item));
+    if (response.statusCode >= 400) {
+      return setState(() {
+        _groceryItems.insert(index, item);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to delete item. Restoring the item.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      });
+    }
   }
 
   @override
