@@ -14,6 +14,7 @@ class GroceryList extends StatefulWidget {
 
 class _GroceryListState extends State<GroceryList> {
   List<GroceryItem> _groceryItems = [];
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -28,7 +29,9 @@ class _GroceryListState extends State<GroceryList> {
 
     final Map<String, dynamic>? fetchedItems = json.decode(response.body);
 
-    if (fetchedItems == null || fetchedItems.isEmpty) return;
+    if (fetchedItems == null || fetchedItems.isEmpty) {
+      return setState(() => isLoading = false);
+    }
 
     final List<GroceryItem> loadedItems = [];
 
@@ -45,6 +48,7 @@ class _GroceryListState extends State<GroceryList> {
       );
     }
 
+    isLoading = false;
     setState(() => _groceryItems = loadedItems);
   }
 
@@ -72,6 +76,56 @@ class _GroceryListState extends State<GroceryList> {
 
   @override
   Widget build(BuildContext context) {
+    Widget mainContent = const Center(
+      child: Text('No items added yet!'),
+    );
+
+    if (isLoading) {
+      mainContent = const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (!isLoading && _groceryItems.isNotEmpty) {
+      mainContent = ListView.builder(
+        itemCount: _groceryItems.length,
+        itemBuilder: (ctx, index) {
+          final item = _groceryItems[index];
+          return Dismissible(
+            key: ValueKey(item.id),
+            direction: DismissDirection.endToStart,
+            onDismissed: (direction) => _removeItem(item.id),
+            background: Container(
+              color: Colors.red,
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: const Icon(
+                Icons.delete,
+                color: Colors.white,
+              ),
+            ),
+            child: ListTile(
+              title: Text(item.name),
+              subtitle: Text(item.category.title),
+              leading: Container(
+                color: item.category.color,
+                width: 30,
+                height: 30,
+              ),
+              trailing: Text(
+                item.quantity.toString(),
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Grocery List'),
@@ -82,50 +136,7 @@ class _GroceryListState extends State<GroceryList> {
           ),
         ],
       ),
-      body: _groceryItems.isEmpty
-          ? const Center(
-              child: Text(
-                'No items added yet!',
-                style: TextStyle(fontSize: 18, color: Colors.grey),
-              ),
-            )
-          : ListView.builder(
-              itemCount: _groceryItems.length,
-              itemBuilder: (ctx, index) {
-                final item = _groceryItems[index];
-                return Dismissible(
-                  key: ValueKey(item.id),
-                  direction: DismissDirection.endToStart,
-                  onDismissed: (direction) => _removeItem(item.id),
-                  background: Container(
-                    color: Colors.red,
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: const Icon(
-                      Icons.delete,
-                      color: Colors.white,
-                    ),
-                  ),
-                  child: ListTile(
-                    title: Text(item.name),
-                    subtitle: Text(item.category.title),
-                    leading: Container(
-                      color: item.category.color,
-                      width: 30,
-                      height: 30,
-                    ),
-                    trailing: Text(
-                      item.quantity.toString(),
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+      body: mainContent,
     );
   }
 }
